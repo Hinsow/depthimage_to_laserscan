@@ -81,7 +81,7 @@ bool DepthImageToLaserScan::use_point(const float new_value, const float old_val
 }
 
 sensor_msgs::LaserScanPtr DepthImageToLaserScan::convert_msg(const sensor_msgs::ImageConstPtr& depth_msg,
-	      const sensor_msgs::CameraInfoConstPtr& info_msg){
+	      const sensor_msgs::CameraInfoConstPtr& info_msg, const int& scan_height_offset){
   // Set camera model
   cam_model_.fromCameraInfo(info_msg);
   
@@ -155,6 +155,10 @@ void DepthImageToLaserScan::set_range_limits(const float range_min, const float 
 
 void DepthImageToLaserScan::set_scan_height(const int scan_height){
   scan_height_ = scan_height;
+}
+
+void DepthImageToLaserScan::set_scan_height_offset(const int scan_height_offset){
+  scan_height_offset_ = scan_height_offset;
 }
 
 void DepthImageToLaserScan::set_output_frame(const std::string output_frame_id){

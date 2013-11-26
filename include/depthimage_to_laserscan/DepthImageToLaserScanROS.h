@@ -52,6 +52,7 @@ namespace depthimage_to_laserscan
     DepthImageToLaserScanROS(ros::NodeHandle& n, ros::NodeHandle& pnh);
     
     ~DepthImageToLaserScanROS();
+    int scan_height_offset = 0;
 
   private:
     /**

@@ -57,7 +57,7 @@ void DepthImageToLaserScanROS::depthCb(const sensor_msgs::ImageConstPtr& depth_m
 	      const sensor_msgs::CameraInfoConstPtr& info_msg){
   try
   {
-    sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg, info_msg);
+    sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg, info_msg, scan_height_offset);
     pub_.publish(scan_msg);
   }
   catch (std::runtime_error& e)
@@ -87,5 +87,6 @@ void DepthImageToLaserScanROS::reconfigureCb(depthimage_to_laserscan::DepthConfi
     dtl_.set_scan_time(config.scan_time);
     dtl_.set_range_limits(config.range_min, config.range_max);
     dtl_.set_scan_height(config.scan_height);
+    dtl_.set_scan_height_offset(config.scan_height_offset);
     dtl_.set_output_frame(config.output_frame_id);
 }

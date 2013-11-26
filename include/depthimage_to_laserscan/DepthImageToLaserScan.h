@@ -34,6 +34,7 @@
 #ifndef DEPTH_IMAGE_TO_LASERSCAN
 #define DEPTH_IMAGE_TO_LASERSCAN
 
+#include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/image_encodings.h>
@@ -60,11 +61,12 @@ namespace depthimage_to_laserscan
      * 
      * @param depth_msg UInt16 or Float32 encoded depth image.
      * @param info_msg CameraInfo associated with depth_msg
+     * @param scan_height_offset vertical pixel offset from center of image to generate the laserscan from.
      * @return sensor_msgs::LaserScanPtr for the center row(s) of the depth image.
      * 
      */
     sensor_msgs::LaserScanPtr convert_msg(const sensor_msgs::ImageConstPtr& depth_msg,
-					   const sensor_msgs::CameraInfoConstPtr& info_msg);
+					   const sensor_msgs::CameraInfoConstPtr& info_msg, const int& scan_height_offset);
     
     /**
      * Sets the scan time parameter.
@@ -101,6 +103,12 @@ namespace depthimage_to_laserscan
      * 
      */
     void set_scan_height(const int scan_height);
+
+    /**
+     * Set vertical offset of scan height
+     * @param scan_height_offset offset in pixels.
+     */
+    void set_scan_height_offset(const int scan_height_offset);
     
     /**
      * Sets the frame_id for the output LaserScan.
@@ -182,6 +190,12 @@ namespace depthimage_to_laserscan
       int row_step = depth_msg->step / sizeof(T);
 
       int offset = (int)(cam_model.cy()-scan_height/2);
+
+      // Apply vertical offset to center of scan row from center of image
+      offset += scan_height_offset_;
+      // TODO : Clamp to min/max heights
+      // if (offset + scan_height_offset_ > )
+
       depth_row += offset*row_step; // Offset to center of image
 
       for(int v = offset; v < offset+scan_height_; v++, depth_row += row_step){
@@ -216,6 +230,7 @@ namespace depthimage_to_laserscan
     float range_min_; ///< Stores the current minimum range to use.
     float range_max_; ///< Stores the current maximum range to use.
     int scan_height_; ///< Number of pixel rows to use when producing a laserscan from an area.
+    int scan_height_offset_; ///< Number of pixel offset vertically for producing laser scan.
     std::string output_frame_id_; ///< Output frame_id for each laserscan.  This is likely NOT the camera's frame_id.
   };
   
