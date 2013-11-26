@@ -39,7 +39,7 @@ int main(int argc, char **argv){
   ros::NodeHandle pnh("~");
   
   depthimage_to_laserscan::DepthImageToLaserScanROS dtl(n, pnh);
-
+  
   ros::spin();
   return 0;
 }

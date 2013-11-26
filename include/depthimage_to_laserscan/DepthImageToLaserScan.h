@@ -34,7 +34,6 @@
 #ifndef DEPTH_IMAGE_TO_LASERSCAN
 #define DEPTH_IMAGE_TO_LASERSCAN
 
-#include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/LaserScan.h>
 #include <sensor_msgs/image_encodings.h>
