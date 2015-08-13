@@ -97,7 +97,7 @@ TEST(ConvertTest, setupLibrary)
   info_msg_->P[6] = 235.5;
   info_msg_->P[10] = 1.0;
   
-  sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg_, info_msg_, scan_height_offset);
+  sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg_, info_msg_);
   
   // Test set variables
   EXPECT_EQ(scan_msg->scan_time, scan_time);
@@ -113,11 +113,11 @@ TEST(ConvertTest, testExceptions)
   // Test supported image encodings for exceptions
   // Does not segfault as long as scan_height = 1
   depth_msg_->encoding = sensor_msgs::image_encodings::RGB8;
-  EXPECT_THROW(dtl_.convert_msg(depth_msg_, info_msg_, scan_height_offset), std::runtime_error);
+  EXPECT_THROW(dtl_.convert_msg(depth_msg_, info_msg_), std::runtime_error);
   depth_msg_->encoding = sensor_msgs::image_encodings::TYPE_32FC1;
-  EXPECT_NO_THROW(dtl_.convert_msg(depth_msg_, info_msg_, scan_height_offset));
+  EXPECT_NO_THROW(dtl_.convert_msg(depth_msg_, info_msg_));
   depth_msg_->encoding = sensor_msgs::image_encodings::TYPE_16UC1;
-  EXPECT_NO_THROW(dtl_.convert_msg(depth_msg_, info_msg_, scan_height_offset));
+  EXPECT_NO_THROW(dtl_.convert_msg(depth_msg_, info_msg_));
 }
 
 // Check to make sure the mininum is output for each pixel column for various scan heights
@@ -148,7 +148,7 @@ TEST(ConvertTest, testScanHeight)
     }
 
     // Convert
-    sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg_, info_msg_, scan_height_offset);
+    sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg_, info_msg_);
 
     // Test for minimum
     float high_float_thresh = (float)high_value * 1.0f/1000.0f * 0.9f; // 0.9f represents 10 percent margin on range
@@ -178,7 +178,7 @@ TEST(ConvertTest, testRandom)
   }
   
   // Convert
-  sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg_, info_msg_, scan_height_offset);
+  sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg_, info_msg_);
   
   // Make sure all values are greater than or equal to range_min and less than or equal to range_max
   for(size_t i = 0; i < scan_msg->ranges.size(); i++){

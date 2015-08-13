@@ -42,6 +42,7 @@
 #include <sstream>
 #include <limits.h>
 #include <math.h>
+#include <ros/ros.h>
 
 namespace depthimage_to_laserscan
 { 
@@ -65,7 +66,7 @@ namespace depthimage_to_laserscan
      * 
      */
     sensor_msgs::LaserScanPtr convert_msg(const sensor_msgs::ImageConstPtr& depth_msg,
-					   const sensor_msgs::CameraInfoConstPtr& info_msg, const int& scan_height_offset);
+					   const sensor_msgs::CameraInfoConstPtr& info_msg);
     
     /**
      * Sets the scan time parameter.
@@ -194,6 +195,8 @@ namespace depthimage_to_laserscan
       offset += scan_height_offset_;
       // TODO : Clamp to min/max heights
       // if (offset + scan_height_offset_ > )
+
+      ROS_ERROR_STREAM("scan_height_offset_: " << scan_height_offset_);
 
       depth_row += offset*row_step; // Offset to center of image
 
