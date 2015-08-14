@@ -43,6 +43,7 @@
 #include <limits.h>
 #include <math.h>
 #include <ros/ros.h>
+#include <Eigen/Dense>
 
 namespace depthimage_to_laserscan
 {
@@ -193,11 +194,18 @@ private:
     int offset = (int)(cam_model.cy() - scan_height / 2);
 
     // Apply vertical offset to center of scan row from center of image
-    offset += scan_height_offset_;
-    // TODO : Clamp to min/max heights
-    // if (offset + scan_height_offset_ > )
+    if (scan_height_offset_ >= 0)
+    {
+      if(scan_height_offset_ > depth_msg->height - scan_height_)
+      {
+        ROS_WARN_STREAM_ONCE("depthimage_to_laserscan: Set scan_height_offset is too high (" << scan_height_ << " pixel). Using closest valid instead");
+        offset = depth_msg->height - scan_height_;
+      }
+      else
+        offset = scan_height_offset_;
+    }
 
-    ROS_ERROR_STREAM("scan_height_offset_: " << scan_height_offset_);
+    ROS_INFO_STREAM_ONCE("depthimage_to_laserscan: Scan line offset is " << offset << " pixel");
 
     depth_row += offset * row_step; // Offset to center of image
 
@@ -208,18 +216,36 @@ private:
         T depth = depth_row[u];
 
         double r = depth; // Assign to pass through NaNs and Infs
-        double th = -atan2((double)(u - center_x) * constant_x, unit_scaling); // Atan2(x, z), but depth divides out
-        int index = (th - scan_msg->angle_min) / scan_msg->angle_increment;
+        double theta = 0.0;
 
         if (depthimage_to_laserscan::DepthTraits<T>::valid(depth))
         { // Not NaN or Inf
           // Calculate in XYZ
-          double x = (u - center_x) * depth * constant_x;
+
+          double du = u - center_x;
+
+          double x = du * depth * constant_x;
+          double y = (v - center_y) * depth * constant_y;
           double z = depthimage_to_laserscan::DepthTraits<T>::toMeters(depth);
 
-          // Calculate actual distance
-          r = sqrt(pow(x, 2.0) + pow(z, 2.0));
+          r = sqrt(pow(x, 2.0) + pow(y, 2.0) + pow(z, 2.0));
+
+          if (du != 0)
+          {
+            //calculate angle if we are not in the center (special case, gives nan)
+            Eigen::Vector3d ray(x, y, z);
+
+            x = 0;
+            y = (v - center_y) * depth * constant_y;
+            z = depthimage_to_laserscan::DepthTraits<T>::toMeters(depth);
+
+            Eigen::Vector3d center_ray(x, y, z);
+
+            theta = std::acos(ray.dot(center_ray) / (center_ray.norm() * ray.norm()));
+            theta = copysign(theta, du); //add sign depending on the side
+          }
         }
+        int index = (-theta - scan_msg->angle_min) / scan_msg->angle_increment;
 
         // Determine if this point should be used.
         if (use_point(r, scan_msg->ranges[index], scan_msg->range_min, scan_msg->range_max))
