@@ -35,7 +35,9 @@
 
 using namespace depthimage_to_laserscan;
 
-DepthImageToLaserScanROS::DepthImageToLaserScanROS(ros::NodeHandle& n, ros::NodeHandle& pnh):pnh_(pnh), it_(n), srv_(pnh) {
+DepthImageToLaserScanROS::DepthImageToLaserScanROS(ros::NodeHandle& n, ros::NodeHandle& pnh) :
+    pnh_(pnh), it_(n), srv_(pnh)
+{
   boost::mutex::scoped_lock lock(connect_mutex_);
   scan_height_offset = 0;
   // Dynamic Reconfigure
@@ -44,17 +46,18 @@ DepthImageToLaserScanROS::DepthImageToLaserScanROS(ros::NodeHandle& n, ros::Node
   srv_.setCallback(f);
 
   // Lazy subscription to depth image topic
-  pub_ = n.advertise<sensor_msgs::LaserScan>("scan", 10, boost::bind(&DepthImageToLaserScanROS::connectCb, this, _1), boost::bind(&DepthImageToLaserScanROS::disconnectCb, this, _1));
+  pub_ = n.advertise<sensor_msgs::LaserScan>("scan", 10, boost::bind(&DepthImageToLaserScanROS::connectCb, this, _1),
+                                             boost::bind(&DepthImageToLaserScanROS::disconnectCb, this, _1));
 }
 
-DepthImageToLaserScanROS::~DepthImageToLaserScanROS(){
+DepthImageToLaserScanROS::~DepthImageToLaserScanROS()
+{
   sub_.shutdown();
 }
 
-
-
 void DepthImageToLaserScanROS::depthCb(const sensor_msgs::ImageConstPtr& depth_msg,
-	      const sensor_msgs::CameraInfoConstPtr& info_msg){
+                                       const sensor_msgs::CameraInfoConstPtr& info_msg)
+{
   try
   {
     sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg, info_msg);
@@ -66,27 +69,32 @@ void DepthImageToLaserScanROS::depthCb(const sensor_msgs::ImageConstPtr& depth_m
   }
 }
 
-void DepthImageToLaserScanROS::connectCb(const ros::SingleSubscriberPublisher& pub) {
+void DepthImageToLaserScanROS::connectCb(const ros::SingleSubscriberPublisher& pub)
+{
   boost::mutex::scoped_lock lock(connect_mutex_);
-  if (!sub_ && pub_.getNumSubscribers() > 0) {
+  if (!sub_ && pub_.getNumSubscribers() > 0)
+  {
     ROS_DEBUG("Connecting to depth topic.");
     image_transport::TransportHints hints("raw", ros::TransportHints(), pnh_);
     sub_ = it_.subscribeCamera("image", 10, &DepthImageToLaserScanROS::depthCb, this, hints);
   }
 }
 
-void DepthImageToLaserScanROS::disconnectCb(const ros::SingleSubscriberPublisher& pub) {
+void DepthImageToLaserScanROS::disconnectCb(const ros::SingleSubscriberPublisher& pub)
+{
   boost::mutex::scoped_lock lock(connect_mutex_);
-  if (pub_.getNumSubscribers() == 0) {
+  if (pub_.getNumSubscribers() == 0)
+  {
     ROS_DEBUG("Unsubscribing from depth topic.");
     sub_.shutdown();
   }
 }
 
-void DepthImageToLaserScanROS::reconfigureCb(depthimage_to_laserscan::DepthConfig& config, uint32_t level){
-    dtl_.set_scan_time(config.scan_time);
-    dtl_.set_range_limits(config.range_min, config.range_max);
-    dtl_.set_scan_height(config.scan_height);
-    dtl_.set_scan_height_offset(config.scan_height_offset);
-    dtl_.set_output_frame(config.output_frame_id);
+void DepthImageToLaserScanROS::reconfigureCb(depthimage_to_laserscan::DepthConfig& config, uint32_t level)
+{
+  dtl_.set_scan_time(config.scan_time);
+  dtl_.set_range_limits(config.range_min, config.range_max);
+  dtl_.set_scan_height(config.scan_height);
+  dtl_.set_scan_height_offset(config.scan_height_offset);
+  dtl_.set_output_frame(config.output_frame_id);
 }
