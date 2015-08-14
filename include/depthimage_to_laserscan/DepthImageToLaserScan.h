@@ -103,6 +103,12 @@ namespace depthimage_to_laserscan
     void set_scan_height(const int scan_height);
     
     /**
+      * Set vertical offset of scan height
+      * @param scan_height_offset offset in pixels.
+      */
+    void set_scan_height_offset(const int scan_height_offset);
+
+    /**
      * Sets the frame_id for the output LaserScan.
      * 
      * Output frame_id for the LaserScan.  Will probably NOT be the same frame_id as the depth image.
@@ -216,6 +222,7 @@ namespace depthimage_to_laserscan
     float range_min_; ///< Stores the current minimum range to use.
     float range_max_; ///< Stores the current maximum range to use.
     int scan_height_; ///< Number of pixel rows to use when producing a laserscan from an area.
+    int scan_height_offset_;
     std::string output_frame_id_; ///< Output frame_id for each laserscan.  This is likely NOT the camera's frame_id.
   };
   

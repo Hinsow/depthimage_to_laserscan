@@ -157,6 +157,10 @@ void DepthImageToLaserScan::set_scan_height(const int scan_height){
   scan_height_ = scan_height;
 }
 
+void DepthImageToLaserScan::set_scan_height_offset(const int scan_height_offset){
+  scan_height_offset_ = scan_height_offset;
+}
+
 void DepthImageToLaserScan::set_output_frame(const std::string output_frame_id){
   output_frame_id_ = output_frame_id;
 }
