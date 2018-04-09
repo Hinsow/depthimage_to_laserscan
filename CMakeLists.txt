@@ -3,22 +3,35 @@ cmake_minimum_required(VERSION 2.8)
 project(depthimage_to_laserscan)
 
 # Load catkin and all dependencies required for this package
+# _yujinEdit_ start
+# find_package(catkin REQUIRED dynamic_reconfigure image_geometry image_transport nodelet roscpp sensor_msgs)
 find_package(catkin REQUIRED dynamic_reconfigure image_geometry image_transport nodelet roscpp sensor_msgs cmake_modules)
 find_package(Eigen REQUIRED)
+# _yujinEdit_ end
 #find_package(OpenCV REQUIRED)
 
 # Dynamic reconfigure support
 generate_dynamic_reconfigure_options(cfg/Depth.cfg)
+
+# _yujinEdit_ start
+#catkin_package(
+#  INCLUDE_DIRS include
+#  LIBRARIES DepthImageToLaserScan DepthImageToLaserScanROS DepthImageToLaserScanNodelet
+#  CATKIN_DEPENDS dynamic_reconfigure image_geometry image_transport nodelet roscpp sensor_msgs
+#)
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES DepthImageToLaserScan DepthImageToLaserScanROS DepthImageToLaserScanNodelet
   CATKIN_DEPENDS dynamic_reconfigure image_geometry image_transport nodelet roscpp sensor_msgs cmake_modules eigen
 )
+# _yujinEdit_ end
 
+# _yujinEdit_ start
+# include_directories(include ${catkin_INCLUDE_DIRS})
 include_directories(include ${catkin_INCLUDE_DIRS} ${EIGEN_INCLUDE_DIRS})
-
 add_definitions(${EIGEN_DEFINITIONS})
+# _yujinEdit_ end
 
 add_library(DepthImageToLaserScan src/DepthImageToLaserScan.cpp)
 target_link_libraries(DepthImageToLaserScan ${catkin_LIBRARIES})

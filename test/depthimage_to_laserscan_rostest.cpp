@@ -47,15 +47,14 @@ sensor_msgs::CameraInfoPtr info_msg_;
 
 size_t message_count_;
 
-void callback(const sensor_msgs::LaserScanConstPtr& msg)
-{
+void callback(const sensor_msgs::LaserScanConstPtr& msg){
   message_count_++;
 }
 
 TEST(transform_listener, commsTest)
 {
   ros::NodeHandle n;
-
+  
   // Set up output messages
   depth_msg_.reset(new sensor_msgs::Image);
   depth_msg_->header.seq = 42;
@@ -65,10 +64,10 @@ TEST(transform_listener, commsTest)
   depth_msg_->width = 640;
   depth_msg_->encoding = sensor_msgs::image_encodings::TYPE_16UC1;
   depth_msg_->is_bigendian = false;
-  depth_msg_->step = depth_msg_->width * 2; // 2 bytes per pixel
+  depth_msg_->step = depth_msg_->width*2; // 2 bytes per pixel
   uint16_t value = 0x0F;
-  depth_msg_->data.assign(depth_msg_->height * depth_msg_->step, value); // Sets all values to 3.855m
-
+  depth_msg_->data.assign(depth_msg_->height*depth_msg_->step, value); // Sets all values to 3.855m
+  
   info_msg_.reset(new sensor_msgs::CameraInfo);
   info_msg_->header = depth_msg_->header;
   info_msg_->height = depth_msg_->height;
@@ -88,42 +87,41 @@ TEST(transform_listener, commsTest)
   info_msg_->P[5] = 570.3422241210938;
   info_msg_->P[6] = 235.5;
   info_msg_->P[10] = 1.0;
-
+  
   // Set up publisher
   ros::Publisher pub = n.advertise<sensor_msgs::Image>("image", 5);
   ros::Publisher pub_info = n.advertise<sensor_msgs::CameraInfo>("camera_info", 5);
-
+  
   // Subscribe to output
   ros::Subscriber sub = n.subscribe("scan", 20, callback);
-
+  
   // Sleep to allow connections to settle
   ros::Duration(5.0).sleep();
-
+  
   size_t number_published = 10;
-  double sleep_duration = 1.0 / 30.0;
-
+  double sleep_duration = 1.0/30.0;
+  
   // Publish some data
-  for (size_t i = 0; i < number_published; i++)
-  {
+  for(size_t i = 0; i < number_published; i++){
     pub.publish(depth_msg_);
     pub_info.publish(info_msg_);
     ros::Duration(sleep_duration).sleep();
     ros::spinOnce();
   }
-
+  
   // Wait a while longer
   ros::Duration(2.0).sleep();
   ros::spinOnce();
-
+  
   EXPECT_EQ(number_published, message_count_);
 }
 
-int main(int argc, char **argv)
-{
+
+int main(int argc, char **argv){
   testing::InitGoogleTest(&argc, argv);
   ros::init(argc, argv, "depthimage_to_laserscan_unittest");
 
   message_count_ = 0;
-
+  
   return RUN_ALL_TESTS();
 }

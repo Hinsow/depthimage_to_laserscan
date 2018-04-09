@@ -26,21 +26,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
+ 
 /* 
  * Author: Chad Rockey
  */
 
 #include <depthimage_to_laserscan/DepthImageToLaserScanROS.h>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv){
   ros::init(argc, argv, "depthimage_to_laserscan");
   ros::NodeHandle n;
   ros::NodeHandle pnh("~");
-
+  
   depthimage_to_laserscan::DepthImageToLaserScanROS dtl(n, pnh);
-
+  
   ros::spin();
+
   return 0;
 }
