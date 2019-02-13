@@ -32,8 +32,12 @@
  */
 
 #include <depthimage_to_laserscan/DepthImageToLaserScanROS.h>
+#include <depthimage_to_laserscan/angle_transform.h>
 
 using namespace depthimage_to_laserscan;
+
+angle_transform_publisher AngleTransformPublisher;
+
 
 DepthImageToLaserScanROS::DepthImageToLaserScanROS(ros::NodeHandle& n, ros::NodeHandle& pnh) :
     pnh_(pnh), it_(n), srv_(pnh)
@@ -60,13 +64,26 @@ void DepthImageToLaserScanROS::depthCb(const sensor_msgs::ImageConstPtr& depth_m
 {
   try
   {
+    int   pixel = 360;
+    float laserScanAngle = AngleTransformPublisher.angle(pixel, info_msg);
+    
     sensor_msgs::LaserScanPtr scan_msg = dtl_.convert_msg(depth_msg, info_msg);
+    std::string from_frame = scan_msg->header.frame_id;
+    scan_msg->header.frame_id = "depth_laser_scan";
     pub_.publish(scan_msg);
+    
+    
+    std::vector<std::string> frames = {"depth_laser_scan"};
+    std::vector<float> angles = {laserScanAngle};
+        
+    AngleTransformPublisher.publish_angle_transforms(from_frame, frames, angles);
+    
   }
   catch (std::runtime_error& e)
   {
     ROS_ERROR_THROTTLE(1.0, "Could not convert depth image to laserscan: %s", e.what());
   }
+  
 }
 
 void DepthImageToLaserScanROS::connectCb(const ros::SingleSubscriberPublisher& pub)
